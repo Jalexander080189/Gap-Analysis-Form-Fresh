@@ -188,12 +188,16 @@ b2cHomeownership: z.string().optional(),
 b2cAdditionalOptionsText: z.string().optional(),
 
 
-  // GPT Data Block
+// GPT Data Block
   gptDataBlock: z.string().optional(),
   owners: z.string().optional(), 
 });
 
 export type CompanyGapAnalysisFormValues = z.infer<typeof formSchema>;
+
+// Add this line to export the schema
+export { formSchema };
+
 
 interface CompanyGapAnalysisFormProps {
   initialData?: Partial<CompanyGapAnalysisFormValues>;

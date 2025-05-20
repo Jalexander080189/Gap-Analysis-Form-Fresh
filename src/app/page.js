@@ -1,77 +1,174 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { CompanyGapAnalysisForm } from '@/components/CompanyGapAnalysisForm';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import ClientInformation from '@/components/sections/ClientInformation';
+import MarketOverview from '@/components/sections/MarketOverview';
+import CompanyOverview from '@/components/sections/CompanyOverview';
+import GapsOpportunity from '@/components/sections/GapsOpportunity';
+import Demographics from '@/components/sections/Demographics';
+import Scenario from '@/components/sections/Scenario';
+import SBABudget from '@/components/sections/SBABudget';
+import MarketingChannels from '@/components/sections/MarketingChannels';
+import GPTData from '@/components/sections/GPTData';
 
-// We'll test each component one by one
-const TestComponent = () => {
-  const [activeComponent, setActiveComponent] = useState('none');
-  
-  // Helper function to dynamically import components
-  const renderComponent = () => {
-    try {
-      switch (activeComponent) {
-        case 'ClientInformation':
-          const ClientInformation = require('../components/sections/ClientInformation').default;
-          return <ClientInformation formData={{}} setFormData={() => {}} />;
-        case 'MarketOverview':
-          const MarketOverview = require('../components/sections/MarketOverview').default;
-          return <MarketOverview formData={{}} setFormData={() => {}} />;
-        case 'CompanyOverview':
-          const CompanyOverview = require('../components/sections/CompanyOverview').default;
-          return <CompanyOverview formData={{}} setFormData={() => {}} />;
-        case 'GapsOpportunity':
-          const GapsOpportunity = require('../components/sections/GapsOpportunity').default;
-          return <GapsOpportunity formData={{}} setFormData={() => {}} />;
-        case 'Scenario':
-          const Scenario = require('../components/sections/Scenario').default;
-          return <Scenario formData={{}} setFormData={() => {}} />;
-        case 'Demographics':
-          const Demographics = require('../components/sections/Demographics').default;
-          return <Demographics formData={{}} setFormData={() => {}} />;
-        case 'MarketingChannels':
-          const MarketingChannels = require('../components/sections/MarketingChannels').default;
-          return <MarketingChannels formData={{}} setFormData={() => {}} />;
-        case 'SBABudget':
-          const SBABudget = require('../components/sections/SBABudget').default;
-          return <SBABudget formData={{}} setFormData={() => {}} />;
-        case 'GPTData':
-          const GPTData = require('../components/sections/GPTData').default;
-          return <GPTData formData={{}} setFormData={() => {}} />;
-        default:
-          return <div>Select a component to test</div>;
-      }
-    } catch (error) {
-      return <div>Error loading component: {error.message}</div>;
-    }
-  };
-  
-  return (
-    <div className="max-w-4xl mx-auto py-8 px-4 bg-white text-black">
-      <h1 className="text-3xl font-bold text-center mb-8 text-black">Business Gap Analysis</h1>
-      
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Component Tester</h2>
-        <div className="flex flex-wrap gap-2 mb-4">
-          <button onClick={() => setActiveComponent('none')} className="px-3 py-1 bg-gray-200 rounded">None</button>
-          <button onClick={() => setActiveComponent('ClientInformation')} className="px-3 py-1 bg-gray-200 rounded">Client Information</button>
-          <button onClick={() => setActiveComponent('MarketOverview')} className="px-3 py-1 bg-gray-200 rounded">Market Overview</button>
-          <button onClick={() => setActiveComponent('CompanyOverview')} className="px-3 py-1 bg-gray-200 rounded">Company Overview</button>
-          <button onClick={() => setActiveComponent('GapsOpportunity')} className="px-3 py-1 bg-gray-200 rounded">Gaps & Opportunity</button>
-          <button onClick={() => setActiveComponent('Scenario')} className="px-3 py-1 bg-gray-200 rounded">Scenario</button>
-          <button onClick={() => setActiveComponent('Demographics')} className="px-3 py-1 bg-gray-200 rounded">Demographics</button>
-          <button onClick={() => setActiveComponent('MarketingChannels')} className="px-3 py-1 bg-gray-200 rounded">Marketing Channels</button>
-          <button onClick={() => setActiveComponent('SBABudget')} className="px-3 py-1 bg-gray-200 rounded">SBA Budget</button>
-          <button onClick={() => setActiveComponent('GPTData')} className="px-3 py-1 bg-gray-200 rounded">GPT Data</button>
-        </div>
-        
-        <div className="border p-4 rounded-lg min-h-64">
-          {renderComponent()}
-        </div>
-      </div>
-    </div>
-  );
-};
+// Import your form schema from CompanyGapAnalysisForm
+import { formSchema } from '@/components/CompanyGapAnalysisForm';
 
 export default function Home() {
-  return <TestComponent />;
+  const [activeComponent, setActiveComponent] = useState(null);
+  
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      marketingChannels: [{ channelName: '', monthlySpend: undefined, notes: '' }],
+      targetAudienceType: undefined,
+      gptDataBlock: '', 
+      industry: '',
+      industryOther: '',
+      audienceSize: undefined,
+      buyerRate: undefined,
+      annualCustomerValue: undefined,
+      lookerStudioLink: '',
+      funnelType: "leadGen",
+      websiteVisitors: undefined,
+      leads: undefined,
+      newClosedAccounts: undefined,
+      visibilityIncrease: undefined,
+      leadConversionIncrease: undefined,
+      closeRateIncrease: undefined,
+    }
+  });
+
+  const handleSubmit = (data) => {
+    console.log('Form submitted:', data);
+    // Handle form submission
+  };
+
+  const renderComponent = () => {
+    switch(activeComponent) {
+      case 'client':
+        return <ClientInformation />;
+      case 'market':
+        return <MarketOverview />;
+      case 'company':
+        return <CompanyOverview />;
+      case 'gaps':
+        return <GapsOpportunity />;
+      case 'scenario':
+        return <Scenario />;
+      case 'demographics':
+        return <Demographics />;
+      case 'marketing':
+        return <MarketingChannels />;
+      case 'sba':
+        return <SBABudget />;
+      case 'gpt':
+        return <GPTData />;
+      default:
+        return <div className="p-6 text-center">Select a component to view</div>;
+    }
+  };
+
+  return (
+    <main className="container mx-auto py-8 px-4 max-w-5xl">
+      <h1 className="text-3xl font-bold mb-2 text-center">Business Gap Analysis</h1>
+      <p className="text-center text-gray-600 mb-8">Complete the form to analyze business gaps and opportunities</p>
+      
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className="mb-8">
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button 
+                type="button"
+                onClick={() => setActiveComponent(null)}
+                className={`px-4 py-2 rounded-md ${!activeComponent ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Overview
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('client')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'client' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Client Information
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('market')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'market' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Market Overview
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('company')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'company' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Company Overview
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('gaps')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'gaps' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Gaps & Opportunity
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('scenario')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'scenario' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Scenario
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('demographics')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'demographics' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Demographics
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('marketing')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'marketing' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Marketing Channels
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('sba')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'sba' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                SBA Budget
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('gpt')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'gpt' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                GPT Data
+              </button>
+            </div>
+            
+            <div className="border rounded-lg shadow-sm">
+              {renderComponent()}
+            </div>
+          </div>
+          
+          <div className="flex justify-end mt-6">
+            <button 
+              type="submit" 
+              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+            >
+              Save Analysis
+            </button>
+          </div>
+        </form>
+      </FormProvider>
+    </main>
+  );
 }
