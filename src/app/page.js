@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CompanyGapAnalysisForm } from '@/components/CompanyGapAnalysisForm';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import Scenario from '@/components/sections/Scenario';
 import SBABudget from '@/components/sections/SBABudget';
 import MarketingChannels from '@/components/sections/MarketingChannels';
 import GPTData from '@/components/sections/GPTData';
+import ShareableLinkGenerator from '@/components/sections/ShareableLinkGenerator';
 
 // Import your form schema from CompanyGapAnalysisForm
 import { formSchema } from '@/components/CompanyGapAnalysisForm';
@@ -40,12 +41,68 @@ export default function Home() {
       visibilityIncrease: undefined,
       leadConversionIncrease: undefined,
       closeRateIncrease: undefined,
+      shareableLink: '',
     }
   });
+  
+  // Auto-save effect
+  useEffect(() => {
+    const shareableLink = form.watch('shareableLink');
+    if (shareableLink) {
+      // Extract slug from the URL
+      const slug = shareableLink.split('/').pop();
+      
+      // Set up auto-save
+      const autoSave = setTimeout(() => {
+        const data = form.getValues();
+        localStorage.setItem(`report-${slug}`, JSON.stringify(data));
+        console.log('Auto-saved to', slug);
+      }, 5000); // Save 5 seconds after changes
+      
+      return () => clearTimeout(autoSave);
+    }
+  }, [form.watch()]);
+  
+  // Load data from URL on initial load
+  useEffect(() => {
+    // Check if we're on a report page
+    const path = window.location.pathname;
+    if (path.startsWith('/reports/')) {
+      const slug = path.split('/').pop();
+      const savedReport = localStorage.getItem(`report-${slug}`);
+      
+      if (savedReport) {
+        try {
+          const data = JSON.parse(savedReport);
+          form.reset(data);
+          console.log('Loaded report from', slug);
+        } catch (e) {
+          console.error('Error loading report:', e);
+        }
+      }
+    }
+  }, []);
 
   const handleSubmit = (data) => {
-    console.log('Form submitted:', data);
-    // Handle form submission
+    // Generate a slug from the company name or use a random ID if no name
+    const slug = data.clientName 
+      ? data.clientName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      : `company-${Math.random().toString(36).substring(2, 10)}`;
+    
+    // Save data to localStorage
+    localStorage.setItem(`report-${slug}`, JSON.stringify(data));
+    
+    // Generate the shareable URL
+    const shareableUrl = `${window.location.origin}/reports/${slug}`;
+    
+    // Update the form with the shareable link
+    form.setValue('shareableLink', shareableUrl);
+    
+    // Show success message or redirect
+    alert(`Report saved! Shareable link: ${shareableUrl}`);
+    
+    // Optional: redirect to the report page
+    // window.location.href = shareableUrl;
   };
 
   const renderComponent = () => {
@@ -68,6 +125,8 @@ export default function Home() {
         return <SBABudget />;
       case 'gpt':
         return <GPTData />;
+      case 'share':
+        return <ShareableLinkGenerator />;
       default:
         return <div className="p-6 text-center">Select a component to view</div>;
     }
@@ -151,6 +210,13 @@ export default function Home() {
                 className={`px-4 py-2 rounded-md ${activeComponent === 'gpt' ? 'bg-primary text-white' : 'bg-gray-200'}`}
               >
                 GPT Data
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveComponent('share')}
+                className={`px-4 py-2 rounded-md ${activeComponent === 'share' ? 'bg-primary text-white' : 'bg-gray-200'}`}
+              >
+                Save & Share
               </button>
             </div>
             
