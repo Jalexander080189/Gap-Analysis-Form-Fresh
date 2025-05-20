@@ -1,4 +1,4 @@
-echo '{
+{
   "name": "gap-analysis-form",
   "version": "1.0.0",
   "private": true,
@@ -21,4 +21,4 @@ echo '{
     "postcss": "8.4.31",
     "tailwindcss": "3.3.5"
   }
-}' > package.json
+}
