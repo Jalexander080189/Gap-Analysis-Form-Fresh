@@ -96,6 +96,21 @@ const formSchema = z.object({
   funnelStage3Metrics: z.string().optional(),
   funnelStage4Name: z.string().optional(),
   funnelStage4Metrics: z.string().optional(),
+  // Funnel Toggle and Metrics
+funnelType: z.enum(["leadGen", "retail"]).default("leadGen"),
+websiteVisitors: z.preprocess(
+  (val) => parseNumberWithSuffixes(String(val)),
+  z.number({ invalid_type_error: "Must be a number" }).nonnegative({ message: "Cannot be negative" }).optional()
+),
+leads: z.preprocess(
+  (val) => parseNumberWithSuffixes(String(val)),
+  z.number({ invalid_type_error: "Must be a number" }).nonnegative({ message: "Cannot be negative" }).optional()
+),
+newClosedAccounts: z.preprocess(
+  (val) => parseNumberWithSuffixes(String(val)),
+  z.number({ invalid_type_error: "Must be a number" }).nonnegative({ message: "Cannot be negative" }).optional()
+),
+
 
   // Scenario Planning
   scenarioName1: z.string().optional(),
@@ -113,6 +128,20 @@ const formSchema = z.object({
   scenarioLikelihood3: z.string().optional(),
   scenarioImpact3: z.string().optional(),
   scenarioMitigation3: z.string().optional(),
+  // Scenario Planning What-If Calculator
+visibilityIncrease: z.preprocess(
+  (val) => (val === "" || val === undefined || val === null) ? undefined : (typeof val === 'string' ? parseFloat(val) : val),
+  z.number({ invalid_type_error: "Must be a number" }).optional()
+),
+leadConversionIncrease: z.preprocess(
+  (val) => (val === "" || val === undefined || val === null) ? undefined : (typeof val === 'string' ? parseFloat(val) : val),
+  z.number({ invalid_type_error: "Must be a number" }).optional()
+),
+closeRateIncrease: z.preprocess(
+  (val) => (val === "" || val === undefined || val === null) ? undefined : (typeof val === 'string' ? parseFloat(val) : val),
+  z.number({ invalid_type_error: "Must be a number" }).optional()
+),
+
 
   // Current Marketing
   marketingChannels: z.array(marketingChannelSchema).optional(),
@@ -140,11 +169,24 @@ const formSchema = z.object({
   ),
   sbaBudgetNotes: z.string().optional(),
 
-  // Demographics & Target Audience
-  targetAudienceType: z.enum(["B2C", "B2B", "Both"]).optional(),
-  demographicsB2C: z.string().optional(),
-  demographicsB2B: z.string().optional(),
-  targetAudienceNotes: z.string().optional(),
+// Demographics & Target Audience
+targetAudienceType: z.enum(["B2C", "B2B", "Both"]).optional(),
+demographicsB2C: z.string().optional(),
+demographicsB2B: z.string().optional(),
+targetAudienceNotes: z.string().optional(),
+// B2B Demographics fields
+b2bLocation: z.string().optional(),
+b2bIndustries: z.string().optional(),
+b2bCompanySize: z.string().optional(),
+b2bRevenueRange: z.string().optional(),
+b2bAdditionalOptionsText: z.string().optional(),
+// B2C Demographics fields
+b2cLocation: z.string().optional(),
+b2cAgeGroup: z.string().optional(),
+b2cIncomeLevel: z.string().optional(),
+b2cHomeownership: z.string().optional(),
+b2cAdditionalOptionsText: z.string().optional(),
+
 
   // GPT Data Block
   gptDataBlock: z.string().optional(),
@@ -209,16 +251,24 @@ export const CompanyGapAnalysisForm: React.FC<CompanyGapAnalysisFormProps> = ({
   const form = useForm<CompanyGapAnalysisFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || { 
-      marketingChannels: [{ channelName: '', monthlySpend: undefined, notes: '' }],
-      targetAudienceType: undefined,
-      gptDataBlock: '', 
-      industry: '',
-      industryOther: '',
-      audienceSize: undefined,
-      buyerRate: undefined,
-      annualCustomerValue: undefined,
-      lookerStudioLink: '', // Initialize new field
-    }, 
+  marketingChannels: [{ channelName: '', monthlySpend: undefined, notes: '' }],
+  targetAudienceType: undefined,
+  gptDataBlock: '', 
+  industry: '',
+  industryOther: '',
+  audienceSize: undefined,
+  buyerRate: undefined,
+  annualCustomerValue: undefined,
+  lookerStudioLink: '',
+  // Add new default values
+  funnelType: "leadGen",
+  websiteVisitors: undefined,
+  leads: undefined,
+  newClosedAccounts: undefined,
+  visibilityIncrease: undefined,
+  leadConversionIncrease: undefined,
+  closeRateIncrease: undefined,
+}, 
   });
 
   const [gptPasteInput, setGptPasteInput] = useState('');
