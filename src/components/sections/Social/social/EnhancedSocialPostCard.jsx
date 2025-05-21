@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * SocialPostCard - A reusable component for displaying section content as a social media post
+ * EnhancedSocialPostCard - A reusable component for displaying section content as a social media post
+ * with additional reaction options (love, hate) for sections 5-10
  * 
  * @param {Object} props
  * @param {React.ReactNode} props.children - The content to display in the card
@@ -13,40 +14,94 @@ import { formatDistanceToNow } from 'date-fns';
  * @param {string} props.icon - Icon for the avatar (SVG path or component)
  * @param {string} props.iconBg - Background color for the avatar
  * @param {string} props.iconColor - Color for the icon
- * @param {string} props.id - Unique identifier for the post (for like/comment storage)
+ * @param {string} props.id - Unique identifier for the post (for reaction/comment storage)
+ * @param {boolean} props.enhancedReactions - Whether to show enhanced reactions (love/hate)
  */
-const SocialPostCard = ({ 
+const EnhancedSocialPostCard = ({ 
   children, 
   title, 
   icon, 
   iconBg = "bg-blue-100", 
   iconColor = "text-blue-800",
-  id
+  id,
+  enhancedReactions = false
 }) => {
   const [liked, setLiked] = useState(false);
+  const [loved, setLoved] = useState(false);
+  const [hated, setHated] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [timestamp] = useState(new Date());
 
-  // Load likes and comments from localStorage on mount
+  // Load reactions and comments from localStorage on mount
   useEffect(() => {
     const storedLiked = localStorage.getItem(`${id}_liked`);
     if (storedLiked) {
       setLiked(storedLiked === 'true');
     }
 
+    if (enhancedReactions) {
+      const storedLoved = localStorage.getItem(`${id}_loved`);
+      if (storedLoved) {
+        setLoved(storedLoved === 'true');
+      }
+
+      const storedHated = localStorage.getItem(`${id}_hated`);
+      if (storedHated) {
+        setHated(storedHated === 'true');
+      }
+    }
+
     const storedComments = localStorage.getItem(`${id}_comments`);
     if (storedComments) {
       setComments(JSON.parse(storedComments));
     }
-  }, [id]);
+  }, [id, enhancedReactions]);
 
   // Handle like button click
   const handleLike = () => {
     const newLiked = !liked;
     setLiked(newLiked);
     localStorage.setItem(`${id}_liked`, newLiked.toString());
+    
+    // If liking, remove other reactions
+    if (newLiked && enhancedReactions) {
+      setLoved(false);
+      setHated(false);
+      localStorage.setItem(`${id}_loved`, 'false');
+      localStorage.setItem(`${id}_hated`, 'false');
+    }
+  };
+
+  // Handle love button click
+  const handleLove = () => {
+    const newLoved = !loved;
+    setLoved(newLoved);
+    localStorage.setItem(`${id}_loved`, newLoved.toString());
+    
+    // If loving, remove other reactions
+    if (newLoved) {
+      setLiked(false);
+      setHated(false);
+      localStorage.setItem(`${id}_liked`, 'false');
+      localStorage.setItem(`${id}_hated`, 'false');
+    }
+  };
+
+  // Handle hate button click
+  const handleHate = () => {
+    const newHated = !hated;
+    setHated(newHated);
+    localStorage.setItem(`${id}_hated`, newHated.toString());
+    
+    // If hating, remove other reactions
+    if (newHated) {
+      setLiked(false);
+      setLoved(false);
+      localStorage.setItem(`${id}_liked`, 'false');
+      localStorage.setItem(`${id}_loved`, 'false');
+    }
   };
 
   // Handle comment submission
@@ -88,17 +143,47 @@ const SocialPostCard = ({
       </CardContent>
       
       <CardFooter className="border-t border-gray-200 p-3 flex justify-between">
-        <Button 
-          variant={liked ? "default" : "ghost"} 
-          size="sm" 
-          onClick={handleLike}
-          className={`flex items-center ${liked ? 'text-blue-600' : 'text-gray-600'}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-          </svg>
-          Like {liked && '(1)'}
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant={liked ? "default" : "ghost"} 
+            size="sm" 
+            onClick={handleLike}
+            className={`flex items-center ${liked ? 'text-blue-600' : 'text-gray-600'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+            </svg>
+            Like {liked && '(1)'}
+          </Button>
+          
+          {enhancedReactions && (
+            <>
+              <Button 
+                variant={loved ? "default" : "ghost"} 
+                size="sm" 
+                onClick={handleLove}
+                className={`flex items-center ${loved ? 'text-red-600' : 'text-gray-600'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill={loved ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                Love {loved && '(1)'}
+              </Button>
+              
+              <Button 
+                variant={hated ? "default" : "ghost"} 
+                size="sm" 
+                onClick={handleHate}
+                className={`flex items-center ${hated ? 'text-yellow-600' : 'text-gray-600'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill={hated ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                Hate {hated && '(1)'}
+              </Button>
+            </>
+          )}
+        </div>
         
         <Button 
           variant="ghost" 
@@ -159,4 +244,4 @@ const SocialPostCard = ({
   );
 };
 
-export default SocialPostCard;
+export default EnhancedSocialPostCard;
