@@ -1,103 +1,148 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 
-// Import all components
-import ClientInformation from '@/components/ClientInformation';
-import MarketAnalyst from '@/components/MarketAnalyst';
-import CompanyAdvisor from '@/components/CompanyAdvisor';
-import GapStrategist from '@/components/GapStrategist';
-import ScenarioBuilder from '@/components/ScenarioBuilder';
-import Demographics from '@/components/Demographics';
-import MarketingManager from '@/components/MarketingManager';
-import SBABudget from '@/components/SBABudget';
-import CopywriterNotes from '@/components/CopywriterNotes';
-import GPTDataBlock from '@/components/GPTDataBlock';
-import ShareableLink from '@/components/ShareableLink';
+// Import all section components with corrected paths
+import ClientInformationSocial from './sections/social/ClientInformationSocial';
+import MarketOverviewSocial from './sections/social/MarketOverviewSocial';
+import CompanyOverviewSocial from './sections/social/CompanyOverviewSocial';
+import GapsOpportunitySocial from './sections/social/GapsOpportunitySocial';
+import ScenarioBuilderSocial from './sections/social/ScenarioBuilderSocial';
+import DemographicsSocial from './sections/social/DemographicsSocial';
+import MarketingChannelsSocial from './sections/social/MarketingChannelsSocial';
+import SBABudgetSocial from './sections/social/SBABudgetSocial';
+import CopywriterNotesSocial from './sections/social/CopywriterNotesSocial';
+import GPTDataBlockSocial from './sections/social/GPTDataBlockSocial';
+import ShareableLinkSocial from './sections/social/ShareableLinkSocial';
 
+// Main SocialFeedLayout component
 const SocialFeedLayout = () => {
+  // State for form data
   const [formData, setFormData] = useState({});
   
-  // Load saved form data from localStorage on component mount
+  // Load saved form data from localStorage on mount
   useEffect(() => {
-    const savedFormData = localStorage.getItem('gap_analysis_form_data');
-    if (savedFormData) {
-      setFormData(JSON.parse(savedFormData));
+    const savedData = localStorage.getItem('gapAnalysisFormData');
+    if (savedData) {
+      try {
+        setFormData(JSON.parse(savedData));
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+      }
     }
   }, []);
   
-  // Save form data to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem('gap_analysis_form_data', JSON.stringify(formData));
-  }, [formData]);
-  
-  // Update form data
+  // Update form data and save to localStorage
   const updateFormData = (newData) => {
-    setFormData(newData);
+    const updatedData = { ...formData, ...newData };
+    setFormData(updatedData);
+    localStorage.setItem('gapAnalysisFormData', JSON.stringify(updatedData));
   };
-
+  
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <Card className="mb-6">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
-            <Avatar className="h-10 w-10 mr-3">
-              <AvatarImage src="/drive_logo.gif" alt="Drive Social Media" />
-              <AvatarFallback>DS</AvatarFallback>
-            </Avatar>
-            <h1 className="text-xl font-bold">Business Gap Analysis</h1>
+            <img src="/drive_logo.gif" alt="Drive Social Media" className="h-8 w-auto mr-3" />
+            <h1 className="text-xl font-bold">Gap Analysis Form</h1>
           </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm">Feed</Button>
-            <Button variant="outline" size="sm">Analytics</Button>
-            <Button variant="outline" size="sm">Clients</Button>
-            <Button variant="outline" size="sm">Settings</Button>
+          
+          <nav>
+            <ul className="flex space-x-4">
+              <li className="text-blue-600 border-b-2 border-blue-600 pb-1">Home</li>
+              <li className="text-gray-600 hover:text-blue-600">Reports</li>
+              <li className="text-gray-600 hover:text-blue-600">Settings</li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+      
+      <main className="container mx-auto px-4 py-6">
+        {/* Section 1: Client Information (Horizontal) */}
+        <section className="mb-8">
+          <ClientInformationSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+        </section>
+        
+        {/* Sections 2-4: Market Overview, Company Overview, Gaps/Opportunity (Vertical, Symmetrical) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <MarketOverviewSocial 
+              formData={formData} 
+              updateFormData={updateFormData} 
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            Complete this form to analyze your business gaps and opportunities. All changes are automatically saved.
-          </p>
-        </CardContent>
-      </Card>
-      
-      {/* Section 1: Client Information (Horizontal) */}
-      <ClientInformation formData={formData} updateFormData={updateFormData} />
-      
-      {/* Sections 2-4: Market Overview, Company Overview, Gaps/Opportunity (Vertical and symmetrical) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-          <MarketAnalyst formData={formData} updateFormData={updateFormData} />
-        </div>
-        <div>
-          <CompanyAdvisor formData={formData} updateFormData={updateFormData} />
-        </div>
-        <div>
-          <GapStrategist formData={formData} updateFormData={updateFormData} />
-        </div>
-      </div>
-      
-      {/* Sections 5-8: Scenario, Demographics, Current Marketing, SBA Budget (Horizontal) */}
-      <ScenarioBuilder formData={formData} updateFormData={updateFormData} />
-      <Demographics formData={formData} updateFormData={updateFormData} />
-      <MarketingManager formData={formData} updateFormData={updateFormData} />
-      <SBABudget formData={formData} updateFormData={updateFormData} />
-      
-      {/* Section 9: Copywriter Notes (Large with ability to expand) */}
-      <CopywriterNotes formData={formData} updateFormData={updateFormData} />
-      
-      {/* Section 10: GPT Data Block */}
-      <GPTDataBlock formData={formData} updateFormData={updateFormData} />
-      
-      {/* Shareable Link Generator */}
-      <ShareableLink formData={formData} />
+          
+          <div>
+            <CompanyOverviewSocial 
+              formData={formData} 
+              updateFormData={updateFormData} 
+            />
+          </div>
+          
+          <div>
+            <GapsOpportunitySocial 
+              formData={formData} 
+              updateFormData={updateFormData} 
+            />
+          </div>
+        </section>
+        
+        {/* Sections 5-8: Scenario, Demographics, Marketing Channels, SBA Budget (Horizontal) */}
+        <section className="space-y-6 mb-8">
+          <ScenarioBuilderSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+          
+          <DemographicsSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+          
+          <MarketingChannelsSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+          
+          <SBABudgetSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+        </section>
+        
+        {/* Section 9: Copywriter Notes (Large with formatting) */}
+        <section className="mb-8">
+          <CopywriterNotesSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+        </section>
+        
+        {/* Section 10: GPT Data Block */}
+        <section className="mb-8">
+          <GPTDataBlockSocial 
+            formData={formData} 
+            updateFormData={updateFormData} 
+          />
+        </section>
+        
+        {/* Shareable Link Generator */}
+        <section className="mb-8">
+          <ShareableLinkSocial 
+            formData={formData} 
+          />
+        </section>
+      </main>
       
       {/* Footer */}
-      <div className="mt-8 text-center text-gray-500 text-sm">
-        <p>© 2025 Drive Social Media. All rights reserved.</p>
-      </div>
+      <footer className="bg-white border-t border-gray-200 py-4">
+        <div className="container mx-auto px-4 text-center text-gray-600">
+          <p>© 2025 Drive Social Media. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
