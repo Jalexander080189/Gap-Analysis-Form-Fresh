@@ -1,0 +1,154 @@
+import React, { useState, useEffect } from 'react';
+
+/**
+ * SocialPostCard - A reusable component for social media style posts
+ * 
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Content of the post
+ * @param {string} props.title - Title of the post
+ * @param {React.ReactNode} props.icon - Icon component to display
+ * @param {string} props.iconBg - Background color class for the icon
+ * @param {string} props.iconColor - Text color class for the icon
+ * @param {string} props.id - Unique identifier for the post
+ */
+const SocialPostCard = ({ children, title, icon, iconBg, iconColor, id }) => {
+  // State for like and comment functionality
+  const [liked, setLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
+  const [timestamp] = useState(new Date());
+  
+  // Load saved state from localStorage on mount
+  useEffect(() => {
+    const savedLiked = localStorage.getItem(`${id}_liked`);
+    const savedComments = localStorage.getItem(`${id}_comments`);
+    
+    if (savedLiked) {
+      setLiked(savedLiked === 'true');
+    }
+    
+    if (savedComments) {
+      try {
+        setComments(JSON.parse(savedComments));
+      } catch (error) {
+        console.error('Error parsing saved comments:', error);
+      }
+    }
+  }, [id]);
+  
+  // Handle like button click
+  const handleLike = () => {
+    const newLiked = !liked;
+    setLiked(newLiked);
+    localStorage.setItem(`${id}_liked`, newLiked.toString());
+  };
+  
+  // Handle comment submission
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    
+    if (comment.trim()) {
+      const newComment = {
+        id: Date.now(),
+        text: comment,
+        author: 'You',
+        timestamp: new Date()
+      };
+      
+      const updatedComments = [...comments, newComment];
+      setComments(updatedComments);
+      setComment('');
+      
+      localStorage.setItem(`${id}_comments`, JSON.stringify(updatedComments));
+    }
+  };
+  
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      {/* Post header */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center">
+          <div className={`w-10 h-10 rounded-full ${iconBg} ${iconColor} flex items-center justify-center mr-3`}>
+            {icon}
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">{title}</h2>
+            <p className="text-sm text-gray-500">
+              {new Date(timestamp).toLocaleDateString()} at {new Date(timestamp).toLocaleTimeString()}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Post content */}
+      <div className="p-4">
+        {children}
+      </div>
+      
+      {/* Post footer */}
+      <div className="border-t border-gray-200 p-4 flex justify-between">
+        <button 
+          className={`flex items-center ${liked ? 'text-blue-600' : 'text-gray-600'}`}
+          onClick={handleLike}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill={liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+          </svg>
+          Like
+        </button>
+        
+        <button 
+          className="flex items-center text-gray-600"
+          onClick={( ) => setShowComments(!showComments)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          Comment {comments.length > 0 && `(${comments.length} )`}
+        </button>
+      </div>
+      
+      {/* Comments section */}
+      {showComments && (
+        <div className="border-t border-gray-200 p-4">
+          {comments.length > 0 ? (
+            <div className="mb-4 space-y-3">
+              {comments.map(comment => (
+                <div key={comment.id} className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between">
+                    <span className="font-medium">{comment.author}</span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(comment.timestamp).toLocaleDateString()} at {new Date(comment.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <p className="mt-1">{comment.text}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 mb-4">No comments yet. Be the first to comment!</p>
+          )}
+          
+          <form onSubmit={handleCommentSubmit} className="flex">
+            <input
+              type="text"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write a comment..."
+              className="flex-1 p-2 border border-gray-300 rounded-l"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded-r"
+            >
+              Post
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SocialPostCard;

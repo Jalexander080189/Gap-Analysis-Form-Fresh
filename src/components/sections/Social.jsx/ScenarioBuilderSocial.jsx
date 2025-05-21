@@ -381,4 +381,32 @@ const ScenarioBuilder = ({ formData, updateFormData }) => {
                     <AvatarImage src="/user-avatar.png" alt={c.author} />
                     <AvatarFallback>{c.author[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="bg-gray-100 rounded-2xl
+                  <div className="bg-gray-100 rounded-2xl px-4 py-2 flex-grow">
+                    <p className="font-medium">{c.author}</p>
+                    <p className="text-gray-700">{c.text}</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatTimestamp(new Date(c.timestamp))}</p>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Default comment */}
+              <div className="flex items-start">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src="/user-avatar.png" alt="John Smith" />
+                  <AvatarFallback>JS</AvatarFallback>
+                </Avatar>
+                <div className="bg-gray-100 rounded-2xl px-4 py-2 flex-grow">
+                  <p className="font-medium">John Smith</p>
+                  <p className="text-gray-700">These projections look promising! Let's discuss implementation next week.</p>
+                  <p className="text-xs text-gray-500 mt-1">2h ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default ScenarioBuilder;

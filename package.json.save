@@ -1,0 +1,6 @@
+echo '{
+  "name"xt start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.
